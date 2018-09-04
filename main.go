@@ -56,21 +56,21 @@ func main() {
 			log.Print(errors.Wrap(err, "droneTakeOff"))
 		}
 
-		gobot.After(2*time.Second, func() {
+		gobot.After(4*time.Second, func() {
 			err := drone.Forward(2)
 			if err != nil {
 				log.Print(errors.Wrap(err, "drone.Forward"))
 			}
 		})
 
-		gobot.After(time.Second, func() {
-			err := drone.Backward(3)
+		gobot.After(5*time.Second, func() {
+			err := drone.Backward(2)
 			if err != nil {
 				log.Print(errors.Wrap(err, "drone.Backward"))
 			}
 		})
 
-		gobot.After(5*time.Second, func() {
+		gobot.After(6*time.Second, func() {
 			err := drone.Land()
 			if err != nil {
 				log.Print(errors.Wrap(err, "mplayer.Start"))
