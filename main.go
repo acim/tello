@@ -10,8 +10,17 @@ import (
 	"gobot.io/x/gobot/platforms/dji/tello"
 )
 
+type flightData struct {
+	batteryPercentage int8
+	Height            int16
+}
+
+var flightDataState flightData
+
 func main() {
 	drone := tello.NewDriver("8888")
+
+	flightDataState = flightData{}
 
 	work := func() {
 		mplayer := exec.Command("mplayer", "-fps", "25", "-")
@@ -46,80 +55,68 @@ func main() {
 		})
 
 		drone.On(tello.FlightDataEvent, func(data interface{}) {
-			fd := data.(*tello.FlightData)
-			log.Printf("Height: %d Battery: %d\n", fd.Height, fd.BatteryPercentage)
+			logFlightData(data.(*tello.FlightData))
+
 		})
 
-		drone.On(tello.TakeoffEvent, func(data interface{}) {
-			log.Printf("Takeoff: %#v", data)
-		})
-
-		drone.On(tello.LandingEvent, func(data interface{}) {
-			log.Printf("Landing: %#v", data)
-		})
-
-		drone.On(tello.FlipEvent, func(data interface{}) {
-			log.Printf("Flip: %#v", data)
-		})
-
-		drone.On(tello.BounceEvent, func(data interface{}) {
-			log.Printf("Bounce: %#v", data)
-		})
-
-		log.Print("droneTakeOff")
 		err := drone.TakeOff()
 		if err != nil {
-			log.Print(errors.Wrap(err, "droneTakeOff"))
+			log.Fatal(errors.Wrap(err, "droneTakeOff"))
 		}
+		time.Sleep(5 * time.Second)
 
-		gobot.After(5*time.Second, func() {
-			err := drone.Forward(10)
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.Forward"))
-			}
-		})
+		err = drone.Forward(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Forward"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(7*time.Second, func() {
-			err := drone.Backward(10)
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.Backward"))
-			}
-		})
+		err = drone.Backward(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Backward"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(9*time.Second, func() {
-			err := drone.Left(10)
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.Left"))
-			}
-		})
+		err = drone.Left(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Left"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(12*time.Second, func() {
-			err := drone.Right(10)
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.Right"))
-			}
-		})
+		err = drone.Right(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Right"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(15*time.Second, func() {
-			err := drone.FrontFlip()
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.FrontFlip"))
-			}
-		})
+		err = drone.Up(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Up"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(16*time.Second, func() {
-			err := drone.BackFlip()
-			if err != nil {
-				log.Print(errors.Wrap(err, "drone.BackFlip"))
-			}
-		})
+		err = drone.Down(10)
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.Down"))
+		}
+		time.Sleep(2 * time.Second)
 
-		gobot.After(17*time.Second, func() {
-			err := drone.Land()
-			if err != nil {
-				log.Print(errors.Wrap(err, "mplayer.Start"))
-			}
-		})
+		err = drone.FrontFlip()
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.FrontFlip"))
+		}
+		time.Sleep(2 * time.Second)
+
+		err = drone.BackFlip()
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.BackFlip"))
+		}
+		time.Sleep(2 * time.Second)
+
+		err = drone.Land()
+		if err != nil {
+			log.Print(errors.Wrap(err, "mplayer.Start"))
+		}
 	}
 
 	robot := gobot.NewRobot("tello",
@@ -131,5 +128,16 @@ func main() {
 	err := robot.Start()
 	if err != nil {
 		log.Print(errors.Wrap(err, "robot.Start"))
+	}
+}
+
+func logFlightData(fd *tello.FlightData) {
+	newFD := flightData{
+		batteryPercentage: fd.BatteryPercentage,
+		Height:            fd.Height,
+	}
+	if newFD != flightDataState {
+		flightDataState = newFD
+		log.Printf("Height: %d Battery: %d\n", fd.Height, fd.BatteryPercentage)
 	}
 }
