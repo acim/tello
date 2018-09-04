@@ -113,6 +113,18 @@ func main() {
 		}
 		time.Sleep(2 * time.Second)
 
+		err = drone.LeftFlip()
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.LeftFlip"))
+		}
+		time.Sleep(2 * time.Second)
+
+		err = drone.RightFlip()
+		if err != nil {
+			log.Print(errors.Wrap(err, "drone.RightFlip"))
+		}
+		time.Sleep(2 * time.Second)
+
 		err = drone.Land()
 		if err != nil {
 			log.Print(errors.Wrap(err, "mplayer.Start"))
